@@ -2,10 +2,9 @@ use std::env;
 use std::path::PathBuf;
 use std::process;
 
-// Declare the module defined in audio_file.rs
 pub mod audio_file;
+pub mod constants;
 
-// Bring the public items from the module into scope
 use audio_file::AudioFileWithTags;
 
 fn main() {
@@ -27,7 +26,7 @@ fn main() {
         }
         Err(e) => {
             eprintln!("Failed to process file {:?}: {}", file_path.display(), e);
-            process::exit(1); // Exit with a non-zero status code to indicate failure
+            process::exit(1);
         }
     }
 }

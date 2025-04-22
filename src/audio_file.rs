@@ -1,6 +1,8 @@
-use id3::{Error, ErrorKind, Tag, TagLike}; // Use alias for clarity
+use id3::{Error, ErrorKind, Tag};
 use std::path::{Path, PathBuf};
-use std::result::Result as StdResult; // Alias for standard Result
+use std::result::Result as StdResult;
+
+use crate::constants;
 
 pub struct AudioFileWithTags {
     path: PathBuf,
@@ -11,10 +13,8 @@ impl AudioFileWithTags {
     pub fn from_path<P: AsRef<Path>>(path: P) -> StdResult<Self, Error> {
         let path_buf = path.as_ref().to_path_buf();
 
-        // Use the id3 crate's read_from_path function
         match Tag::read_from_path(&path_buf) {
             Ok(tag) => {
-                // Successfully read a tag
                 println!(
                     "Info: Successfully read ID3 tag from {:?}",
                     path_buf.display()
@@ -26,7 +26,6 @@ impl AudioFileWithTags {
             }
             Err(e) => {
                 if let ErrorKind::NoTag = e.kind {
-                    // This is the NoTag error
                     println!("Info: No ID3 tag found for {:?}", path_buf.display());
                     Ok(AudioFileWithTags {
                         path: path_buf,
@@ -50,37 +49,25 @@ impl AudioFileWithTags {
 
     pub fn display_tags(&self) {
         println!(
-            "--- Parsing results for {:?} ---",
+            "\n--- Parsing results for {:?} ---",
             self.path.file_name().unwrap_or_default()
         );
         match &self.tags {
             Some(tag) => {
-                println!("{:#?}", tag);
-                println!("  Status: ID3 Tag found");
-                println!("  Title: {}", tag.title().unwrap_or("N/A"));
-                println!("  Artist: {}", tag.artist().unwrap_or("N/A"));
-                println!("  Album: {}", tag.album().unwrap_or("N/A"));
-                // Use map_or for optional numerical values
-                println!(
-                    "  Year: {}",
-                    tag.year().map_or("N/A".to_string(), |y| y.to_string())
-                );
-                println!("  Genre: {}", tag.genre().unwrap_or("N/A"));
-                println!(
-                    "  Track: {}",
-                    tag.track().map_or("N/A".to_string(), |t| t.to_string())
-                );
-                println!(
-                    "  Duration: {}",
-                    tag.duration()
-                        .map_or("N/A".to_string(), |d| format!("{}s", d))
-                );
-                // Add other fields as needed
+                for frame in tag.frames() {
+                    let label = constants::frame_id_to_label(frame.id());
+                    let content = if frame.content().to_string().is_empty() {
+                        "N/A".to_string()
+                    } else {
+                        frame.content().to_string()
+                    };
+                    println!(" {} - {}: {}", frame.id(), label, content);
+                }
             }
             None => {
                 println!("  Status: No ID3 tag found");
             }
         }
-        println!("------------------------------------------");
+        println!("------------------------------------------\n");
     }
 }
