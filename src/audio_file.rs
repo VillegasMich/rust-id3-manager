@@ -2,8 +2,6 @@ use id3::{Error, ErrorKind, Tag};
 use std::path::{Path, PathBuf};
 use std::result::Result as StdResult;
 
-use crate::constants;
-
 pub struct AudioFileWithTags {
     path: PathBuf,
     tags: Option<Tag>,
@@ -55,13 +53,12 @@ impl AudioFileWithTags {
         match &self.tags {
             Some(tag) => {
                 for frame in tag.frames() {
-                    let label = constants::frame_id_to_label(frame.id());
                     let content = if frame.content().to_string().is_empty() {
                         "N/A".to_string()
                     } else {
                         frame.content().to_string()
                     };
-                    println!(" {} - {}: {}", frame.id(), label, content);
+                    println!(" {} - {}: {}", frame.id(), frame.name(), content);
                 }
             }
             None => {
