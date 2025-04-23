@@ -5,12 +5,16 @@ use colored::Colorize;
 pub struct CommandsManager {}
 
 impl CommandsManager {
-    pub fn show(file: &str) -> io::Result<()> {
+    pub fn show(file: &str, as_json: bool) -> io::Result<()> {
         let file_path = PathBuf::from(file);
         println!("Attempting to parse: {:?}", file_path.display());
         match AudioFileWithTags::from_path(&file_path) {
             Ok(audio_file) => {
-                audio_file.display_tags();
+                if as_json {
+                    audio_file.display_as_json();
+                } else {
+                    audio_file.display_tags();
+                }
                 println!(
                     "{}",
                     format!("✅ Parsing successfull for file {:?}", file_path)

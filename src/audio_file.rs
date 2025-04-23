@@ -1,5 +1,7 @@
 use colored::Colorize;
 use id3::{Content, Error, ErrorKind, Frame, Tag, TagLike, Version};
+use serde_json::{json, Map, Value};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::result::Result as StdResult;
 
@@ -84,5 +86,37 @@ impl AudioFileWithTags {
             }
         }
         println!("------------------------------------------\n");
+    }
+
+    pub fn display_as_json(&self) {
+        match &self.tags {
+            Some(tag) => {
+                let mut tag_map: HashMap<String, Vec<String>> = HashMap::new();
+
+                for frame in tag.frames() {
+                    let id = frame.id().to_string();
+                    let content = frame.content().to_string();
+                    let entry = tag_map.entry(id).or_default();
+                    entry.push(if content.is_empty() {
+                        "N/A".to_string()
+                    } else {
+                        content
+                    });
+                }
+
+                let mut json_map = Map::new();
+                for (k, v) in tag_map {
+                    json_map.insert(k, json!(v));
+                }
+
+                println!(
+                    "{}",
+                    serde_json::to_string_pretty(&Value::Object(json_map)).unwrap()
+                );
+            }
+            None => {
+                println!("{}", json!({ "status": "No ID3 tag found" }));
+            }
+        }
     }
 }

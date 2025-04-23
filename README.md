@@ -97,7 +97,7 @@ id3-parser --supp-tags
 ## 🔧 Roadmap
 
 - [ ] Add support for removing tags.
-- [ ] Add JSON export of tag data.
+- [x] Add JSON export of tag data.
 - [x] Add better terminal UI
 - [ ] Add AI support for completing tags information
 

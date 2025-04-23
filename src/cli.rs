@@ -15,9 +15,13 @@ pub struct Args {
     #[arg(long)]
     pub supp_tags: bool,
 
-    /// Show ID3 tags
+    /// Show ID3 tags  (requires --file <FILE>)
     #[arg(short, long, requires = "file")]
     pub show: bool,
+
+    /// Show ID3 tags in json format (requires --file <FILE> --show)
+    #[arg(short, long, requires = "show")]
+    pub json: bool,
 
     /// Add ID3 tag
     #[arg(short, long, value_name = "\"ID3-TAG=VALUE\"", requires = "file")]
@@ -32,7 +36,7 @@ pub fn parse() -> io::Result<()> {
         return Ok(());
     }
     match (&cli.file, cli.show, &cli.add) {
-        (Some(file), true, _) => CommandsManager::show(file),
+        (Some(file), true, _) => CommandsManager::show(file, cli.json),
         (Some(file), false, Some(tag)) => CommandsManager::add(file, tag),
         (Some(file), false, None) => {
             println!("{} {}", "File selected:".bold(), file.underline());
