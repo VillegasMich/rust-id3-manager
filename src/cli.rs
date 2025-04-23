@@ -1,4 +1,5 @@
 use clap::*;
+use colored::Colorize;
 use std::io;
 
 use crate::commands_manager::CommandsManager;
@@ -34,13 +35,21 @@ pub fn parse() -> io::Result<()> {
         (Some(file), true, _) => CommandsManager::show(file),
         (Some(file), false, Some(tag)) => CommandsManager::add(file, tag),
         (Some(file), false, None) => {
-            println!("File selected: {}", file);
+            println!("{} {}", "File selected:".bold(), file.underline());
             println!("No other command found.");
-            println!("Use --help to display all available commands.");
+            println!(
+                "Use {} to display all available commands.",
+                "--help".yellow().bold()
+            );
             Ok(())
         }
         (None, _, _) => {
-            eprintln!("❌ No file provided. Use -f <FILE> to specify an audio file.");
+            eprintln!(
+                "❌ {}",
+                "No file provided. Use -f <FILE> to specify an audio file."
+                    .red()
+                    .bold()
+            );
             Err(io::Error::new(
                 io::ErrorKind::InvalidInput,
                 "No file provided",
