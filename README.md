@@ -20,13 +20,13 @@ cd rust-id3-manager
 cargo build --release
 
 # Run the binary
-./target/release/rust-id3-manager --help
+./target/release/id3-parser --help
 
 # Or build into the path
 cargo install --path .
 
 # Run from path
-rust-id3-manager --help
+id3-parser --help
 ```
 
 ## 🚀 Usage
@@ -34,19 +34,19 @@ rust-id3-manager --help
 ### Show tags from a file
 
 ```bash
-rust-id3-manager -f <file.mp3> --show
+id3-parser -f <file.mp3> --show
 ```
 
 ### Add a tag to a file
 
 ```bash
-rust-id3-manager -f <file.mp3> --add "TIT2=My Custom Title"
+id3-parser -f <file.mp3> --add "TIT2=My Custom Title"
 ```
 
 ### Show supported tag IDs
 
 ```bash
-rust-id3-manager --supp-tags
+id3-parser --supp-tags
 ```
 
 ## 🧠 Supported ID3 Tags (v2.3)
@@ -92,12 +92,14 @@ rust-id3-manager --supp-tags
 - `src/audio_file.rs` - Logic for reading, writing, and displaying ID3 tags.
 - `src/main.rs` - Entry point and command matching.
 - `src/commands.rs` - Commands manager with `show`, `add`, and `supp_tags` functions.
+- `resources/*` - .mp3 files for testing
 
 ## 🔧 Roadmap
 
 - [ ] Add support for removing tags.
-- [ ] Add JSON export of tag data.
-- [ ] Add better terminal UI
+- [x] Add JSON export of tag data.
+- [x] Add better terminal UI
+- [ ] Add AI support for completing tags information
 
 ## 📝 License
 

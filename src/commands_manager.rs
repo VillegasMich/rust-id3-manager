@@ -1,19 +1,35 @@
 use crate::audio_file::AudioFileWithTags;
 use std::{io, path::PathBuf};
 
+use colored::Colorize;
 pub struct CommandsManager {}
 
 impl CommandsManager {
-    pub fn show(file: &str) -> io::Result<()> {
+    pub fn show(file: &str, as_json: bool) -> io::Result<()> {
         let file_path = PathBuf::from(file);
         println!("Attempting to parse: {:?}", file_path.display());
         match AudioFileWithTags::from_path(&file_path) {
             Ok(audio_file) => {
-                audio_file.display_tags();
+                if as_json {
+                    audio_file.display_as_json();
+                } else {
+                    audio_file.display_tags();
+                }
+                println!(
+                    "{}",
+                    format!("✅ Parsing successfull for file {:?}", file_path)
+                        .green()
+                        .bold()
+                );
                 Ok(())
             }
             Err(e) => {
-                eprintln!("❌ Failed to process file {:?}: {}", file_path.display(), e);
+                eprintln!(
+                    "❌ {} {:?}: {}",
+                    "Failed to process file".red().bold(),
+                    file_path.display(),
+                    e
+                );
                 Err(io::Error::new(io::ErrorKind::Other, e.to_string()))
             }
         }
@@ -24,7 +40,7 @@ impl CommandsManager {
         let (key, value) = match tag_value.split_once('=') {
             Some((k, v)) => (k.trim(), v.trim()),
             None => {
-                eprintln!("❌ Invalid tag format. Use KEY=VALUE.");
+                eprintln!("❌ {}", "Invalid tag format. Use KEY=VALUE.".red().bold());
                 return Err(io::Error::new(
                     io::ErrorKind::InvalidInput,
                     "Invalid tag format",
@@ -39,13 +55,15 @@ impl CommandsManager {
         match audio_with_tags.add_tag(key, value) {
             Ok(()) => {
                 println!(
-                    "✅ Added tag '{}={}' to file '{:#?}'",
-                    key, value, file_path
+                    "{}",
+                    format!("✅ Added tag '{}={}' to file {:?}", key, value, file_path)
+                        .green()
+                        .bold()
                 );
                 Ok(())
             }
             Err(e) => {
-                eprintln!("❌ Failed to add tag: {}", e);
+                eprintln!("❌ {} {}", "Failed to add tag:".red().bold(), e);
                 Err(io::Error::new(io::ErrorKind::Other, e.to_string()))
             }
         }
@@ -87,10 +105,14 @@ impl CommandsManager {
             ("TOFN", "Original filename"),
         ];
 
-        println!("\nSupported ID3 Tag IDs:\n");
+        println!("{}", "\nSupported ID3 Tag IDs:\n".bold());
         for (id, description) in supported_tags.iter() {
             println!("  {} => {}", id, description);
         }
-        println!("\nUse the tag ID as the key when adding a tag (e.g. TIT2=My Song).\n");
+        println!(
+            "\nUse the tag {} as the key when adding a tag (e.g. {}).\n",
+            "ID".bold().yellow(),
+            "TIT2=My Song".bold()
+        );
     }
 }
