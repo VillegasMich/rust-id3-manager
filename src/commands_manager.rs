@@ -1,0 +1,96 @@
+use crate::audio_file::AudioFileWithTags;
+use std::{io, path::PathBuf};
+
+pub struct CommandsManager {}
+
+impl CommandsManager {
+    pub fn show(file: &str) -> io::Result<()> {
+        let file_path = PathBuf::from(file);
+        println!("Attempting to parse: {:?}", file_path.display());
+        match AudioFileWithTags::from_path(&file_path) {
+            Ok(audio_file) => {
+                audio_file.display_tags();
+                Ok(())
+            }
+            Err(e) => {
+                eprintln!("❌ Failed to process file {:?}: {}", file_path.display(), e);
+                Err(io::Error::new(io::ErrorKind::Other, e.to_string()))
+            }
+        }
+    }
+
+    pub fn add(file: &str, tag_value: &str) -> io::Result<()> {
+        let file_path = PathBuf::from(file);
+        let (key, value) = match tag_value.split_once('=') {
+            Some((k, v)) => (k.trim(), v.trim()),
+            None => {
+                eprintln!("❌ Invalid tag format. Use KEY=VALUE.");
+                return Err(io::Error::new(
+                    io::ErrorKind::InvalidInput,
+                    "Invalid tag format",
+                ));
+            }
+        };
+        let mut audio_with_tags = match AudioFileWithTags::from_path(&file_path) {
+            Ok(audio_with_tags) => audio_with_tags,
+            Err(e) => return Err(io::Error::new(io::ErrorKind::Other, e.to_string())),
+        };
+
+        match audio_with_tags.add_tag(key, value) {
+            Ok(()) => {
+                println!(
+                    "✅ Added tag '{}={}' to file '{:#?}'",
+                    key, value, file_path
+                );
+                Ok(())
+            }
+            Err(e) => {
+                eprintln!("❌ Failed to add tag: {}", e);
+                Err(io::Error::new(io::ErrorKind::Other, e.to_string()))
+            }
+        }
+    }
+
+    pub fn show_supported_id3_tags() {
+        let supported_tags = [
+            ("TIT2", "Title"),
+            ("TPE1", "Artist"),
+            ("TALB", "Album"),
+            ("TYER", "Year"),
+            ("TRCK", "Track number"),
+            ("TCON", "Genre"),
+            ("COMM", "Comment"),
+            ("TXXX", "User-defined text information"),
+            ("USLT", "Lyrics"),
+            ("TENC", "Encoded by"),
+            ("TSSE", "Software/Hardware encoder"),
+            ("TCOM", "Composer"),
+            ("TPOS", "Part of a set (disc number)"),
+            ("WXXX", "User-defined URL link"),
+            ("APIC", "Attached picture"),
+            ("TOPE", "Original artist"),
+            ("TORY", "Original release year"),
+            ("TIT3", "Subtitle"),
+            ("TLEN", "Length (duration)"),
+            ("TKEY", "Initial key"),
+            ("TEXT", "Lyricist"),
+            ("TFLT", "File type"),
+            ("TSRC", "ISRC code"),
+            ("WCOM", "Commercial URL"),
+            ("WOAR", "Artist URL"),
+            ("TPUB", "Publisher"),
+            ("TOAL", "Original album"),
+            ("TCOP", "Copyright"),
+            ("TPE2", "Band/Orchestra"),
+            ("TPE3", "Conductor"),
+            ("TPE4", "Interpreted by"),
+            ("TOFN", "Original filename"),
+        ];
+
+        println!("\nSupported ID3 Tag IDs:\n");
+        for (id, description) in supported_tags.iter() {
+            println!("  {} => {}", id, description);
+        }
+        println!("\nUse the tag ID as the key when adding a tag (e.g. TIT2=My Song).\n");
+    }
+}
