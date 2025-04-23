@@ -17,7 +17,19 @@ fn test_show_command() {
         .arg("--show")
         .assert()
         .success()
-        .stdout(predicates::str::contains("Parsing results for"));
+        .stdout(predicates::str::contains("Parsing successfull"));
+}
+
+#[test]
+fn test_show_as_json_command() {
+    let mut cmd = Command::cargo_bin("id3-parser").unwrap();
+    cmd.arg("--file")
+        .arg("resources/Maestro Chives, Egzod, Neoni - Royalty [NCS Release] TEST.mp3")
+        .arg("--show")
+        .arg("--json")
+        .assert()
+        .success()
+        .stdout(predicates::str::contains("Parsing successfull"));
 }
 
 #[test]
