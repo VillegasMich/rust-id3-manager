@@ -1,4 +1,4 @@
-use id3::{Error, ErrorKind, Tag};
+use id3::{Content, Error, ErrorKind, Frame, Tag, TagLike, Version};
 use std::path::{Path, PathBuf};
 use std::result::Result as StdResult;
 
@@ -35,6 +35,13 @@ impl AudioFileWithTags {
                 }
             }
         }
+    }
+
+    pub fn add_tag(&mut self, id: &str, value: &str) -> StdResult<(), Error> {
+        let tag = self.tags.get_or_insert_with(Tag::new);
+        tag.add_frame(Frame::with_content(id, Content::Text(value.to_string())));
+        tag.write_to_path(&self.path, Version::Id3v24)?;
+        Ok(())
     }
 
     pub fn path(&self) -> &PathBuf {
